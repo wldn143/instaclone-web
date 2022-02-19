@@ -1,20 +1,54 @@
+import {
+  faFacebookSquare,
+  faInstagram,
+} from "@fortawesome/free-brands-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { Helmet } from "react-helmet-async";
 import styled from "styled-components";
-import { darkModeVar } from "../apollo";
+import AuthLayout from "../components/auth/AuthLayout";
+import BottomBox from "../components/auth/BottomBox";
+import Button from "../components/auth/Button";
+import FormBox from "../components/auth/FormBox";
+import Input from "../components/auth/Input";
+import Separator from "../components/auth/Saparator";
+import PageTitle from "../components/PageTitle";
+import routes from "../routes";
 
-const Title = styled.h1`
-  color: ${(props) => props.theme.fontColor};
+const FacebookLogin = styled.div`
+  color: #385285;
+  span {
+    margin-left: 10px;
+    font-weight: 600;
+  }
 `;
-const Container = styled.div`
-`;
-
 
 function Login() {
   return (
-    <Container>
-      <Title>Login</Title>
-      <button onClick={()=> darkModeVar(true)}>To dark</button>
-      <button onClick={()=> darkModeVar(false)}>To light</button>
-    </Container>
+    <AuthLayout>
+      <Helmet>
+        <title>Log in | Instaclone</title>
+      </Helmet>
+      <FormBox>
+        <div>
+          <FontAwesomeIcon icon={faInstagram} size="3x" />
+        </div>
+        <form>
+          <Input type="text" placeholder="Username" />
+          <Input type="password" placeholder="Password" />
+          <Button type="submit" value="Log in" />
+        </form>
+        <Separator />
+        <FacebookLogin>
+          <FontAwesomeIcon icon={faFacebookSquare} />
+          <span>Log in with Facebook</span>
+        </FacebookLogin>
+      </FormBox>
+      <BottomBox
+        cta="Don't have an account?"
+        linkText="Sign up"
+        link={routes.signUp}
+      />
+    </AuthLayout>
   );
 }
   export default Login;
