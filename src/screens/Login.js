@@ -14,6 +14,9 @@ import Separator from "../components/auth/Saparator";
 import routes from "../routes";
 import { useForm } from "react-hook-form";
 import FormError from "../components/auth/FormError";
+import { gql,useMutation } from "@apollo/client";
+import { logUserIn } from "../apollo";
+import { useLocation } from "react-router-dom/cjs/react-router-dom.min";
 
 const FacebookLogin = styled.div`
   color: #385285;
@@ -23,14 +26,63 @@ const FacebookLogin = styled.div`
   }
 `;
 
+const Notification = styled.div`
+  color:#2ecc71;
+`
+
+const LOGIN_MUTATION = gql`
+  mutation login($username: String!, $password: String!) {
+    login(username: $username, password: $password) {
+      ok
+      token
+      error
+    }
+  }
+`;
+
 function Login() {
+const location = useLocation()
   const {
     register,
     handleSubmit,
     formState: { errors, isValid, ...formState },
-  } = useForm({ mode: "onChange" });
+    setError,
+    clearErrors,
+    getValues,
+  } = useForm({
+    mode: "onChange",
+    defaultValues: {
+      username: location?.state?.username || "",
+      password: location?.state?.password || "",
+    },
+  });
+
+  const onCompleted = (data) => {
+    const {
+      login: { ok, error, token },
+    } = data;
+    if (!ok) {
+      return setError("result", {
+        message: error,
+      });
+    }
+    if(token){
+      logUserIn(token);
+    }
+  };
+
+  const [login, { loading }] = useMutation(LOGIN_MUTATION, {
+    onCompleted,
+  });
 
   const onSubmitValid=(data)=>{
+    if (loading) {
+      return;
+    }
+    const { username, password } = data;
+    login({
+      variables: { username, password },
+    });
   };
 
   return (
@@ -42,15 +94,17 @@ function Login() {
         <div>
           <FontAwesomeIcon icon={faInstagram} size="3x" />
         </div>
+        <Notification>{location?.state?.message}</Notification>
         <form onSubmit={handleSubmit(onSubmitValid)}>
           <Input
             {...register("username", {
               required: "Username is required.",
               minLength: {
-                value: 5,
-                message: "Username should be logger than 5 chars.",
+                value: 1,
+                message: "Username should be logger than 4 chars.",
               },
             })}
+            onFocus={()=>clearErrors("result")}
             type="text"
             placeholder="Username"
             hasError={Boolean(errors?.username?.message)}
@@ -64,7 +118,8 @@ function Login() {
             hasError={Boolean(errors?.password?.message)}
           />
           <FormError message={errors?.password?.message}/>
-          <Button type="submit" value="Log in" disabled={!isValid} />
+          <Button type="submit" value={loading ? "Loading...": "Log in"} disabled={!isValid||loading} />
+          <FormError message={errors?.result?.message}/>
         </form>
         <Separator />
         <FacebookLogin>
