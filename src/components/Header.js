@@ -8,6 +8,7 @@ import styled from "styled-components"
 import { isLoggedInVar } from "../apollo";
 import useUser from "../hooks/useUser";
 import routes from "../routes";
+import Avatar from "./Avatar";
 
 const SHeader = styled.header`
     width:100%;
@@ -40,33 +41,38 @@ const Button = styled.span`
   font-weight: 600;
 `;
 
+const IconContainer = styled.div`
+  display: flex;
+  align-items: center;
+`;
+
 function Header(){
     const isLoggedIn = useReactiveVar(isLoggedInVar);
-    const loggedInUser=useUser();
+    const { data } = useUser();
     return (
-        <SHeader>
-          <Wrapper>
-            <Column>
-              <FontAwesomeIcon icon={faInstagram} size="2x" />
-            </Column>
-            <Column>
-              {isLoggedIn ? (
-                <>
-                  <Icon>
-                    <FontAwesomeIcon icon={faHome} size="lg" />
-                  </Icon>
-                  <Icon>
-                    <FontAwesomeIcon icon={faCompass} size="lg" />
-                  </Icon>
-                  <Icon>
-                    <FontAwesomeIcon icon={faUser} size="lg" />
-                  </Icon>
-                </>
-              ) : (
-                <Link href={routes.home}>
-                  <Button>Login</Button>
-                </Link>
-              )}
+      <SHeader>
+        <Wrapper>
+          <Column>
+            <FontAwesomeIcon icon={faInstagram} size="2x" />
+          </Column>
+          <Column>
+            {isLoggedIn ? (
+              <IconContainer>
+                <Icon>
+                  <FontAwesomeIcon icon={faHome} size="lg" />
+                </Icon>
+                <Icon>
+                  <FontAwesomeIcon icon={faCompass} size="lg" />
+                </Icon>
+                <Icon>
+                  <Avatar url={data?.me?.avatar} />
+                </Icon>
+              </IconContainer>
+            ) : (
+              <Link href={routes.home}>
+                <Button>Login</Button>
+              </Link>
+            )}
           </Column>
         </Wrapper>
       </SHeader>
